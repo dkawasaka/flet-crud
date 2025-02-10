@@ -1,13 +1,13 @@
-from operator import contains
-
 import flet as ft
-from flet import Colors, FontWeight, Divider
+from flet import (Colors, FontWeight, Divider, DataColumn, ResponsiveRow, FloatingActionButton,
+                  Text, Row, IconButton, Icons)
+from model.db_wizard import db, Funcionar
 
 value_controllers = {
-    'titulo':['Entrada', 'Saida', 'Ativos']
-    , 'icon':[ft.icons.ARROW_UPWARD, ft.icons.ARROW_DOWNWARD, ft.icons.PEOPLE]
-    , 'color':[ft.Colors.BLUE, ft.Colors.RED, ft.Colors.BLUE]
-    , 'value':[0,0,0]
+    'titulo':['Entrada', 'Saida', 'Ativos'],
+    'icon':[ft.icons.ARROW_UPWARD, ft.icons.ARROW_DOWNWARD, ft.icons.PEOPLE],
+    'color':[ft.Colors.BLUE, ft.Colors.RED, ft.Colors.BLUE],
+    'value':[0,0,0],
 }
 
 def home(page: ft.Page, width:int, height :int):
