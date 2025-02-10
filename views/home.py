@@ -12,10 +12,42 @@ value_controllers = {
 
 def home(page: ft.Page, width:int, height :int):
 
+    def inserir_dados(e, data):
+        alertdialog = AlertDialog(page, 'Adcionar funcionario', dados=data)
+        alertdialog.actions[0].controls[0].on_click = lambda e: novo_func(e)
+
+        def novo_func(e):
+            dados = {}
+            preenchido = True
+            for control in alertdialog.content.controls[0].controls:
+
+                if isinstance(control.value, str) and control.value.strip() == '':
+                    SnapBar(page, f"{control.hint_text} nao foi preenchido", Icons.CLOSE)
+                    preenchido = False
+                    break
+
+                if isinstance(control.value, str):
+                    dados.update({f"{control.hint_text.lower()}":control.value.strip()})
+                else:
+                    dados.update({f"{control.hint_text.lower()}":control.value})
+
+            if preenchido == True:
+                if 'uuid' in dados:
+                    db(Funcionar.uuid==dados['uuid']).update(**dados)
+                else:
+                    func = Funcionar.insert(**dados)
+
+                db.commit()
+
+                # mostrar_dados()
+                alertdialog.open = False
+
+            page.update()
+
+
     view = ft.View(
         route='/',
         bgcolor=ft.Colors.with_opacity(0.2, ft.Colors.BLACK,),
-        # bgcolor=ft.colors.BLACK,
         controls=[
             ft.Stack(
                 width=width,
@@ -35,10 +67,56 @@ def home(page: ft.Page, width:int, height :int):
                         padding=ft.padding.only(top=60, left=60, right=60),
                         content= ft.Column(
                             controls=[
-                                ft.ResponsiveRow(
+                                totais := ft.ResponsiveRow(
                                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                     controls=[
-                                        vcontainer(height=height, data=i) for i in range(len(value_controllers['titulo']))
+                                        ft.Container(
+                                            col={'xs': 12, 'md': 3}
+                                            , bgcolor=ft.Colors.WHITE
+                                            , height=height * 0.19
+                                            , border_radius=10
+                                            , padding=ft.padding.only(top=8, left=5, right=5, bottom=5)
+                                            , content=ft.Column(
+                                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                                controls=[
+                                                    ft.Text(
+                                                        value=value_controllers['titulo'][data].upper()
+                                                        , size=16
+                                                        , weight=ft.FontWeight.BOLD
+                                                        , color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK)
+                                                    )
+                                                    , ft.Divider(
+                                                        height=1
+                                                        , color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK)
+                                                        , thickness=1
+                                                    )
+                                                    , ft.Row(
+                                                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                                                        , spacing=20
+                                                        , controls=[
+                                                            ft.Text(
+                                                                value=f"R$ {value_controllers['value'][data]:.2f}"
+                                                                , color=ft.Colors.with_opacity(0.4,
+                                                                   value_controllers['color'][data])
+                                                                , size=18
+                                                                , weight=ft.FontWeight.BOLD
+                                                            )
+                                                            , ft.Icon(
+                                                                name=value_controllers['icon'][data]
+                                                                , color=ft.Colors.with_opacity(0.4,
+                                                                   value_controllers['color'][data])
+                                                                , size=30
+                                                                # , weight=ft.FontWeight.BOLD
+                                                            )
+                                                        ]
+                                                    )
+                                                ]
+                                            )
+                                        ) for data in range(len(value_controllers['titulo']))
+                                        # container(
+                                        #     height=height,
+                                        #     data=i
+                                        # ) for i in range(len(value_controllers['titulo']))
                                     ]
                                 ),
 
@@ -52,20 +130,68 @@ def home(page: ft.Page, width:int, height :int):
                                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                         controls=[
                                             ft.Container(
-                                                border_radius=10
-                                                ,content=ft.Column(
+                                                border_radius=10,
+                                                padding = ft.padding.only(top=8, left=5, right=5, bottom=5),
+                                                content=ft.Column(
                                                     controls=[
-                                                        ft.Text(
-                                                            value="Tabela de funcionarios",
-                                                            color=Colors.with_opacity(0.4, Colors.BLACK),
-                                                            size=20,
-                                                            weight=FontWeight.BOLD,
+                                                        Row(
+                                                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                                            controls=[
+                                                                Text(
+                                                                    value="Tabela de funcionarios",
+                                                                    color=Colors.with_opacity(0.4, Colors.BLACK),
+                                                                    size=16,
+                                                                    weight=FontWeight.BOLD,
+                                                                ),
+                                                                IconButton(
+                                                                    icon=Icons.ADD_CIRCLE_OUTLINE,
+                                                                    icon_color=Colors.BLUE,
+                                                                    icon_size=20,
+                                                                    # on_click=lambda e: AlertDialog(page, 'Adcionar funcionario')
+                                                                    on_click=lambda e: inserir_dados(e, [])
+                                                                )
+                                                            ]
                                                         ),
                                                         Divider(
                                                             height=2,
                                                             thickness=2,
                                                         ),
-
+                                                        tabela := ft.DataTable(
+                                                            show_bottom_border=True,
+                                                            heading_row_height=35,
+                                                            data_row_max_height=40,
+                                                            divider_thickness=0,
+                                                            column_spacing=200,
+                                                            columns=[
+                                                                DataColumn(
+                                                                    Text( value='Nome', size=13,
+                                                                          color=Colors.with_opacity(0.4, Colors.BLACK)
+                                                                          ),
+                                                                ),
+                                                                DataColumn(
+                                                                    Text(value='Cargo', size=13,
+                                                                         color=Colors.with_opacity(0.4, Colors.BLACK)
+                                                                         ),
+                                                                ),
+                                                                DataColumn(
+                                                                    Text(value='Departamento', size=13,
+                                                                         color=Colors.with_opacity(0.4, Colors.BLACK)
+                                                                         ),
+                                                                ),
+                                                                DataColumn(
+                                                                    Text(value='Email', size=13,
+                                                                         color=Colors.with_opacity(0.4, Colors.BLACK)
+                                                                         ),
+                                                                ),
+                                                                DataColumn(
+                                                                    Text(value='Gerir', size=13,
+                                                                         color=Colors.with_opacity(0.4, Colors.BLACK)
+                                                                         ),
+                                                                ),
+                                                            ],
+                                                            # rows=
+                                                            rows=[]
+                                                        ),
                                                     ]
                                                 )
                                             )
@@ -79,6 +205,8 @@ def home(page: ft.Page, width:int, height :int):
             ),
         ]
     )
+
+    mostrar_dados()
 
     return view
 
