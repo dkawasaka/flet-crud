@@ -44,6 +44,79 @@ def home(page: ft.Page, width:int, height :int):
 
             page.update()
 
+    def mostrar_dados():
+        entrada = db(Funcionar).count()
+        saida = db(Funcionar.is_active==False).count()
+        ativo = entrada - saida
+        value_controllers.update({'value':[entrada, saida, ativo]})
+
+        tabela.rows.clear()
+
+        dados = db(Funcionar.is_active==True).select()
+        if(dados):
+            for data in dados:
+                tabela.rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(
+                                Text(value=data.nome,
+                                     size=13,
+                                     color=Colors.with_opacity(0.4, Colors.BLACK))
+                            ),
+                            ft.DataCell(
+                                Text(value=data.cargo,
+                                     size=13,
+                                     color=Colors.with_opacity(0.4, Colors.BLACK))
+                            ),
+                            ft.DataCell(
+                                Text(value=data.departamento,
+                                     size=13,
+                                     color=Colors.with_opacity(0.4, Colors.BLACK))
+                            ),
+                            ft.DataCell(
+                                Text(value=data.email,
+                                     size=13,
+                                     color=Colors.with_opacity(0.4, Colors.BLACK))
+                            ),
+                            ft.DataCell(
+                                Row(
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                    controls=[
+                                        IconButton(
+                                            icon=Icons.EDIT_DOCUMENT,
+                                            icon_color=Colors.BLUE,
+                                            icon_size=15,
+                                            data=data,
+                                            on_click=lambda e, data=data: inserir_dados(e, data)
+                                        ),
+                                        IconButton(
+                                            icon=Icons.DELETE,
+                                            icon_color=Colors.RED,
+                                            icon_size=15,
+                                            on_click=lambda e, data=data: apagar(e, data)
+                                        )
+                                    ]
+                                )
+                            ),
+                        ]
+                    )
+                )
+
+        for i in range(3):
+            totais.controls[i].content.controls[2].controls[0].value = value_controllers['value'][i]
+            # totais.controls[i].content.controls[2].controls[0].value
+
+        page.update()
+
+    def apagar(e, data):
+        myset = db(Funcionar.uuid==data.uuid)
+        if(myset.select()):
+            myset.update(is_active=False)
+            db.commit()
+
+        mostrar_dados()
+
+        page.update()
 
     view = ft.View(
         route='/',
