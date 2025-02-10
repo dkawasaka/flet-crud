@@ -212,3 +212,27 @@ def AlertDialog(page: ft.Page, title: str, dados:list=[]):
     page.update()
 
     return alertdialog
+
+def SnapBar(page: ft.Page, title:str, icon: Icons):
+    snapbar = ft.SnackBar(
+        content=ft.Row(
+            controls=[
+                ft.Icon(
+                    name=icon,
+                    size=25,
+                    color=Colors.BLUE,
+                ),
+                ft.Text(
+                    value=title,
+                    size=14,
+                    color=Colors.BLUE,
+                )
+            ]
+        )
+    )
+
+    page.overlay.append(snapbar)
+    snapbar.open = True
+    page.update()
+
+    return snapbar
