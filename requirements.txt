@@ -1,0 +1,5 @@
+mysqlclient
+pluralize
+pydal
+#kivy
+flet
