@@ -131,55 +131,84 @@ def vcontainer(height:int, data: int):
 def AlertDialog(page: ft.Page, title: str, dados:list=[]):
 
     value_controls = {
-        'hint_text': ['Nome', 'Cargo', 'Departamento', 'Email'],
-        'icon': [ft.icons.PERSON, ft.icons.WORK, ft.icons.WORK, ft.icons.EMAIL],
+        'hint_text': ['Id', 'Uuid', 'Nome', 'Cargo', 'Departamento', 'Email'],
+        'icon': [Icons.KEY, Icons.KEY, ft.icons.PERSON, ft.icons.WORK, ft.icons.WORK, ft.icons.EMAIL],
     }
 
     def close(e):
         alertdialog.open=False
         page.update()
 
+    controls = []
+    for i in range(len(value_controls['hint_text'])):
+        campo = value_controls['hint_text'][i].lower()
+
+        controls.append(
+            ft.TextField(
+                hint_text=value_controls['hint_text'][i]
+                , prefix_icon=value_controls['icon'][i]
+                , hint_style=ft.TextStyle(
+                    size=13
+                    , color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK)
+                    , weight=ft.FontWeight.BOLD
+                )
+                , text_style=ft.TextStyle(
+                    size=13
+                    , color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK)
+                    , weight=ft.FontWeight.BOLD
+                ),
+                visible=False if i == 1 else True,
+                value=dados[campo] if campo in dados else '',
+                disabled=True if i == 0 else False,
+                autofocus=True,
+            )
+        )
+
     alertdialog = ft.AlertDialog(
         modal=True,
+        bgcolor=Colors.WHITE,
         title=ft.Row(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
                 ft.Text(
-                    value=title
-                    , color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK)
-                    , size=16
+                    value=title,
+                    color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK),
+                    size=16,
+                    weight=FontWeight.BOLD,
                 ),
                 ft.IconButton(
-                    icon=ft.icons.CLOSE
-                    , icon_color=ft.Colors.RED
-                    , icon_size=16
-                    , on_click=lambda e: close(e)
+                    icon=ft.icons.CLOSE,
+                    icon_color=ft.Colors.RED,
+                    icon_size=16,
+                    on_click=lambda e: close(e)
                 )
             ]
-        )
-        , content= ft.ResponsiveRow(
+        ),
+        content= ft.ResponsiveRow(
             controls=[
                 ft.Column(
-                    col={'sm':12, 'md':4}
-                    ,controls=[
-                        ft.TextField(
-                            hint_text=value_controls['hint_text'][i]
-                            , prefix_icon=value_controls['icon'][i]
-                            , hint_style=ft.TextStyle(
-                                size=13
-                                , color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK)
-                                , weight=ft.FontWeight.BOLD
-                            )
-                            , text_style=ft.TextStyle(
-                                size=13
-                                , color=ft.Colors.with_opacity(0.4, ft.Colors.BLACK)
-                                , weight=ft.FontWeight.BOLD
-                            )
-                            # , text_vertical_align=-0.40
-                        ) for i in range(len(value_controls['hint_text']))
-                    ]
+                    col={'sm':12},
+                    height=250,
+                    controls=controls
                 )
             ]
-        )
+        ),
+        actions=[
+            ResponsiveRow(
+                controls=[
+                    FloatingActionButton(
+                        text='Salvar',
+                        bgcolor=Colors.BLUE,
+                        height=48,
+                        foreground_color=Colors.WHITE,
+                    ),
+                ]
+            )
+        ]
     )
-    ...
+
+    page.overlay.append(alertdialog)
+    alertdialog.open=True
+    page.update()
+
+    return alertdialog
